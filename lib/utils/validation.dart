@@ -5,7 +5,7 @@ bool isValidEmail(String email) {
 }
 
 bool isValidNickName(String nickname) {
-  return nickname.length >= 6;
+  return nickname.length <= 6;
 }
 
 bool isValidName(String name) {

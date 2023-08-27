@@ -4,11 +4,12 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_wewallet/Products/Products.dart';
+import 'package:flutter_wewallet/Products/view/Products_screen.dart';
 import 'package:flutter_wewallet/common/const/code.dart';
 import 'package:flutter_wewallet/common/const/colors.dart';
 import 'package:flutter_wewallet/common/const/data.dart';
 import 'package:flutter_wewallet/common/layout/default_layout.dart';
+import 'package:flutter_wewallet/component/atoms/Modal/Modal.dart';
 import 'package:flutter_wewallet/component/atoms/TextField/custom_text_form_field.dart';
 import 'package:flutter_wewallet/utils/cookie_utils.dart';
 import 'package:flutter_wewallet/utils/validation.dart';
@@ -60,6 +61,7 @@ class _SignupScreenState extends State<SignupScreen> {
     }
 
     if (status == USER_STATUS['USER_CREATED']) {
+      _showSuccessDialog(); // 동작하게 하려면 어떻게 ..?
       List<Cookie> cookieList =
           await cookieJar.loadForRequest(response.requestOptions.uri);
 
@@ -75,34 +77,25 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return const Modal(
+          title: '회원가입 성공',
+          description: '메인화면으로 이동합니다.',
+        );
+      },
+    );
+  }
+
   void _showErrorDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('이메일 중복',
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                const SizedBox(height: 20),
-                const Text('다른 이메일을 사용해주세요.'),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Closes the dialog
-                  },
-                  child: const Text('닫기'),
-                ),
-              ],
-            ),
-          ),
+        return const Modal(
+          title: '이메일 중복',
+          description: '다른 이메일을 사용해주세요.',
         );
       },
     );
