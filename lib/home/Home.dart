@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_wewallet/common/const/colors.dart';
 import 'package:flutter_wewallet/common/layout/default_layout.dart';
 import 'package:flutter_wewallet/user/view/login_screen.dart';
+import 'package:flutter_wewallet/user/view/signup_screen.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -97,7 +98,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               ],
             ),
           ),
-          const Column(),
+          const SignupScreen(),
           const LoginScreen(),
         ],
       ),
