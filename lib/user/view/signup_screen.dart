@@ -4,7 +4,7 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_wewallet/Products/view/Products_screen.dart';
+import 'package:flutter_wewallet/Products/view/products_screen.dart';
 import 'package:flutter_wewallet/common/const/code.dart';
 import 'package:flutter_wewallet/common/const/colors.dart';
 import 'package:flutter_wewallet/common/const/data.dart';
@@ -71,7 +71,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
       Navigator.of(localContext).push(
         MaterialPageRoute(
-          builder: (_) => const Products(),
+          builder: (_) => const ProductsScreen(),
         ),
       );
     }

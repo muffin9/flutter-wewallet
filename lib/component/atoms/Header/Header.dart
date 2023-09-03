@@ -7,7 +7,8 @@ class Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return PreferredSize(
       preferredSize: const Size.fromHeight(70.0),
-      child: Container(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -19,19 +20,22 @@ class Header extends StatelessWidget {
             Row(
               children: [
                 Image.asset(
-                  'assets/img/header/more.png',
-                  width: 40,
-                  height: 40,
+                  'assets/img/header/search.png',
+                  color: Colors.white,
+                  width: 16,
+                  height: 16,
                 ),
                 const SizedBox(width: 8.0), // 간격을 주기 위해 추가
                 Image.asset(
                   'assets/img/header/doorbell.png',
+                  color: Colors.white,
                   width: 16,
                   height: 16,
                 ),
                 const SizedBox(width: 8.0), // 간격을 주기 위해 추가
                 Image.asset(
                   'assets/img/header/more.png',
+                  color: Colors.white,
                   width: 16,
                   height: 16,
                 ),
