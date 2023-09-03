@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_wewallet/common/const/colors.dart';
 import 'package:flutter_wewallet/component/atoms/Header/Header.dart';
 
 class DefaultMainLayout extends StatelessWidget {
@@ -14,7 +15,7 @@ class DefaultMainLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: MAIN_LAYOUT_BACKGROUND_COLOR,
       appBar: AppBar(
         title: const Header(),
         backgroundColor: Colors.transparent,

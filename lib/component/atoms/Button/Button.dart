@@ -17,20 +17,18 @@ enum ButtonSize {
 class CustomButton extends StatelessWidget {
   final ButtonVariant variant;
   final String text;
-  final VoidCallback? onClick;
+  final VoidCallback? onPressed;
   final double? width;
   final ButtonSize size;
-  final String? className; // Note: This has no direct equivalent in Flutter
   final bool disabled;
 
   const CustomButton({
     super.key,
     this.variant = ButtonVariant.defaultVariant,
     required this.text,
-    this.onClick,
+    this.onPressed,
     this.width,
     this.size = ButtonSize.medium,
-    this.className,
     this.disabled = false,
   });
 
@@ -41,16 +39,16 @@ class CustomButton extends StatelessWidget {
     EdgeInsetsGeometry padding;
     switch (size) {
       case ButtonSize.small:
-        height = 32;
+        height = 32.0;
         padding = const EdgeInsets.symmetric(horizontal: 4);
         break;
       case ButtonSize.medium:
-        height = 48;
+        height = 48.0;
         padding = const EdgeInsets.symmetric(horizontal: 8);
         break;
       case ButtonSize.large:
       default:
-        height = 56;
+        height = 56.0;
         padding = const EdgeInsets.symmetric(horizontal: 16);
         break;
     }
@@ -60,7 +58,7 @@ class CustomButton extends StatelessWidget {
     BorderRadius borderRadius;
     switch (variant) {
       case ButtonVariant.defaultVariant:
-        bgColor = Colors.grey;
+        bgColor = Colors.white;
         textStyle = const TextStyle(
           fontFamily: 'Pretendard',
         );
@@ -89,7 +87,7 @@ class CustomButton extends StatelessWidget {
           borderRadius: borderRadius,
         )),
       ),
-      onPressed: disabled ? null : onClick,
+      onPressed: disabled ? null : onPressed,
       child: Text(text),
     );
   }

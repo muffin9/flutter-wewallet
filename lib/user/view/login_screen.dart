@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter_wewallet/Products/view/Products_screen.dart';
+import 'package:flutter_wewallet/Products/view/products_screen.dart';
 import 'package:flutter_wewallet/common/const/code.dart';
 import 'package:flutter_wewallet/common/const/colors.dart';
 import 'package:flutter_wewallet/common/const/data.dart';
@@ -39,6 +39,8 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> handleLogin() async {
+    final localContext = context;
+
     final response = await dio.post(
       'http://$ip/user/login',
       data: {
@@ -63,9 +65,9 @@ class LoginScreenState extends State<LoginScreen> {
         await storeCookie(cookie);
       }
 
-      Navigator.of(context).push(
+      Navigator.of(localContext).push(
         MaterialPageRoute(
-          builder: (_) => const Products(),
+          builder: (_) => const ProductsScreen(),
         ),
       );
     }
