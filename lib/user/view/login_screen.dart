@@ -1,37 +1,32 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_wewallet/Products/view/products_screen.dart';
 import 'package:flutter_wewallet/common/const/code.dart';
 import 'package:flutter_wewallet/common/const/colors.dart';
 import 'package:flutter_wewallet/common/const/data.dart';
 import 'package:flutter_wewallet/common/layout/default_layout.dart';
+import 'package:flutter_wewallet/common/secure_storage/secure_storage.dart';
 import 'package:flutter_wewallet/component/atoms/Modal/Modal.dart';
 import 'package:flutter_wewallet/component/atoms/TextField/custom_text_form_field.dart';
-import 'package:flutter_wewallet/utils/cookie_utils.dart';
 import 'package:flutter_wewallet/utils/validation.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk_talk.dart';
-import 'package:dio_cookie_manager/dio_cookie_manager.dart';
-import 'package:cookie_jar/cookie_jar.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   String email = '';
   String password = '';
   final dio = Dio();
-  final cookieJar = CookieJar();
 
   @override
   void initState() {
     super.initState();
-    dio.interceptors.add(CookieManager(cookieJar));
   }
 
   bool isValidInput() {
@@ -58,12 +53,13 @@ class LoginScreenState extends State<LoginScreen> {
     }
 
     if (status == USER_STATUS['USER_LOGIN_SUCCESS']) {
-      List<Cookie> cookieList =
-          await cookieJar.loadForRequest(response.requestOptions.uri);
+      final refreshToken = response.headers.value('refresh-token');
+      final accessToken = response.headers.value('access-token');
 
-      for (Cookie cookie in cookieList) {
-        await storeCookie(cookie);
-      }
+      final storage = ref.read(secureStorageProvider);
+
+      await storage.write(key: REFRESH_TOKEN_KEY, value: refreshToken);
+      await storage.write(key: ACCESS_TOKEN_KEY, value: accessToken);
 
       Navigator.of(localContext).push(
         MaterialPageRoute(

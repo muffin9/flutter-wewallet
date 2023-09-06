@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-const ACCESS_TOKEN_KEY = 'ACCESS_TOKEN_KEY';
-const REFRESH_TOKEN_KEY = 'REFRESH_TOKEN_KEY';
+const ACCESS_TOKEN_KEY = 'access-token';
+const REFRESH_TOKEN_KEY = 'refresh-token';
 const NATIVE_APP_KEY = 'c78ed8a5fd0dc72ada0912b9638bff26';
 
 const storage = FlutterSecureStorage();

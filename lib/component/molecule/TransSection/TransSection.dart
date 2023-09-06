@@ -3,7 +3,9 @@ import 'package:flutter_wewallet/common/const/colors.dart';
 import 'package:flutter_wewallet/component/organism/AddTrans/AddTrans.dart';
 
 class TransSection extends StatelessWidget {
-  const TransSection({Key? key}) : super(key: key);
+  final Map<String, num> model;
+
+  const TransSection({Key? key, required this.model}) : super(key: key);
 
   void _openBottomSheet(BuildContext context) {
     showModalBottomSheet(
@@ -41,6 +43,9 @@ class TransSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final income = model['INCOME'];
+    final expenditure = model['EXPENDITURE'];
+
     return Row(
       children: [
         Expanded(
@@ -49,31 +54,31 @@ class TransSection extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween, // 동작이 안됨.
               children: [
-                const Column(
+                Column(
                   children: [
                     Row(
                       children: [
-                        Text("지출",
+                        const Text("지출",
                             style:
                                 TextStyle(fontSize: 20.0, color: Colors.white)),
-                        SizedBox(
+                        const SizedBox(
                           width: 10.0,
                         ),
-                        Text("1,075,331원",
-                            style:
-                                TextStyle(fontSize: 20.0, color: Colors.white))
+                        Text("$expenditure원",
+                            style: const TextStyle(
+                                fontSize: 20.0, color: Colors.white))
                       ],
                     ),
                     Row(
                       children: [
-                        Text("수입",
+                        const Text("수입",
                             style:
                                 TextStyle(fontSize: 20.0, color: Colors.white)),
-                        SizedBox(
+                        const SizedBox(
                           width: 10.0,
                         ),
-                        Text("1,000원",
-                            style: TextStyle(
+                        Text("$income원",
+                            style: const TextStyle(
                               fontSize: 20.0,
                               color: Colors.white,
                             ))
