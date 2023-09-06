@@ -21,6 +21,7 @@ class CustomButton extends StatelessWidget {
   final double? width;
   final ButtonSize size;
   final bool disabled;
+  final bool isSelected;
 
   const CustomButton({
     super.key,
@@ -30,6 +31,7 @@ class CustomButton extends StatelessWidget {
     this.width,
     this.size = ButtonSize.medium,
     this.disabled = false,
+    this.isSelected = false,
   });
 
   @override
@@ -58,9 +60,10 @@ class CustomButton extends StatelessWidget {
     BorderRadius borderRadius;
     switch (variant) {
       case ButtonVariant.defaultVariant:
-        bgColor = Colors.white;
-        textStyle = const TextStyle(
+        bgColor = isSelected ? Colors.black : Colors.white;
+        textStyle = TextStyle(
           fontFamily: 'Pretendard',
+          color: isSelected ? Colors.white : Colors.black,
         );
         borderRadius = BorderRadius.circular(15);
         break;
@@ -82,13 +85,12 @@ class CustomButton extends StatelessWidget {
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.all(bgColor),
         padding: MaterialStateProperty.all(padding),
-        textStyle: MaterialStateProperty.all(textStyle),
         shape: MaterialStateProperty.all(RoundedRectangleBorder(
           borderRadius: borderRadius,
         )),
       ),
       onPressed: disabled ? null : onPressed,
-      child: Text(text),
+      child: Text(text, style: textStyle),
     );
   }
 }

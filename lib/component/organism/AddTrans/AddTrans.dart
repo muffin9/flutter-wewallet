@@ -1,63 +1,84 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_wewallet/Category/repository/Category.repository.dart';
+import 'package:flutter_wewallet/Products/repository/Products.repository.dart';
+import 'package:flutter_wewallet/common/const/code.dart';
 import 'package:flutter_wewallet/common/const/colors.dart';
+import 'package:flutter_wewallet/common/const/data.dart';
 import 'package:flutter_wewallet/component/atoms/Button/Button.dart';
-import 'package:flutter_wewallet/component/atoms/TextField/custom_text_form_field.dart';
+import 'package:flutter_wewallet/utils/categoryAllResponse.dart';
 import 'package:flutter_wewallet/utils/paymentMethod.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_wewallet/utils/transActionPost.dart';
 
-const TransType = {
-  'INCOME': '수입',
-  'EXPENDITURE': '지출',
-  'TRANSFER': '이체',
-};
-
-class AddTrans extends StatefulWidget {
+class AddTrans extends ConsumerStatefulWidget {
   const AddTrans({super.key});
 
   @override
-  State<AddTrans> createState() => _AddTransState();
+  ConsumerState<AddTrans> createState() => _AddTransState();
 }
 
-class _AddTransState extends State<AddTrans> {
+class _AddTransState extends ConsumerState<AddTrans> {
+  // category 데이터 받아와서 진짜 카테고리로 대체 필요.
   String price = '';
-  String? transType = TransType['EXPENDITURE'];
-  String memo = '';
-  PaymentMethod paymentMethod = PaymentMethod(
-    id: 'CASH',
-    name: '현금',
-    icon: const Icon(Icons.payment),
-  );
+  String type = 'EXPENDITURE';
+  int? categoryId;
+  int? subCategoryId;
+  String account = "";
+  String paymentMethod = "CASH";
 
-  bool isBudget = false;
   DateTime currentDate = DateTime.now();
-  String category = '';
-  String subCategory = '';
+  String memo = '';
+  bool isBudget = false;
 
-  final TextEditingController _priceController = TextEditingController();
+  List<dynamic> allCategory = [];
 
-  String _formatNumber(String s) {
-    var format = NumberFormat("#,###");
-    var number = int.tryParse(s);
-    if (number != null) {
-      return format.format(number);
-    } else {
-      return s;
-    }
-  }
+  // final TextEditingController _priceController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    _priceController.addListener(() {
-      String text = _priceController.text.replaceAll(",", "");
-      _priceController.value = TextEditingValue(
-        text: _formatNumber(text),
-        selection:
-            TextSelection.collapsed(offset: _priceController.text.length),
-      );
-    });
-  }
+  // String _formatNumber(String s) {
+  //   return s.isEmpty
+  //       ? ''
+  //       : int.parse(s).toStringAsFixed(0).replaceAllMapped(
+  //           RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
+  // }
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _priceController.addListener(() {
+  //     _handleTextChange;
+  //   });
+  // }
+
+  // @override
+  // void dispose() {
+  //   _priceController.removeListener(_handleTextChange);
+  //   _priceController.dispose();
+  //   super.dispose();
+  // }
+
+  // void _handleTextChange() {
+  //   String text = _priceController.text;
+
+  //   String cleanText = text.replaceAll(',', '');
+
+  //   if (cleanText.length > 10) {
+  //     cleanText = cleanText.substring(0, 10);
+  //   }
+
+  //   String formattedText = _formatNumber(cleanText);
+
+  //   // 텍스트의 변경을 피하기 위해 현재 삽입 위치를 계산
+  //   int offset =
+  //       _priceController.selection.start + (formattedText.length - text.length);
+
+  //   setState(() {
+  //     _priceController.text = formattedText;
+  //     _priceController.selection = TextSelection.collapsed(offset: offset);
+  //   });
+  // }
 
   void _showPaymentSheet(BuildContext context) {
     showModalBottomSheet(
@@ -70,7 +91,7 @@ class _AddTransState extends State<AddTrans> {
                 title: Text(method.name),
                 onTap: () {
                   setState(() {
-                    paymentMethod = method;
+                    paymentMethod = method.id;
                   });
                   Navigator.pop(context);
                 },
@@ -106,7 +127,7 @@ class _AddTransState extends State<AddTrans> {
       context: context,
       builder: (BuildContext context) {
         return Container(
-            height: 250,
+            height: 400,
             color: Colors.white,
             child: Column(
               children: [
@@ -115,7 +136,6 @@ class _AddTransState extends State<AddTrans> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 32.0),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Padding(
                             padding: EdgeInsets.symmetric(vertical: 16.0),
@@ -125,121 +145,41 @@ class _AddTransState extends State<AddTrans> {
                                   fontSize: 20.0, color: Colors.black),
                             ),
                           ),
-                          Container(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                          Wrap(
+                            spacing: 16.0, // 가로 간격
+                            children: allCategory.map((data) {
+                              String CategoryName =
+                                  data['category']['categoryName'];
+                              String CategoryImageUrl =
+                                  'http://$ip/${data['category']['categoryImageUrl']}';
+                              List<dynamic> subCategories =
+                                  data['category']['subCategory'];
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    categoryId = data['category']['categoryId'];
+                                  });
+                                  _showSubCategory(context, subCategories);
+                                },
+                                child: Column(
                                   children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          category = "식비";
-                                        });
-
-                                        Navigator.pop(context);
-                                        _showSubCategory(context);
-                                      },
-                                      child: const Text("식비",
-                                          style: TextStyle(fontSize: 10.0)),
+                                    SvgPicture.network(
+                                      CategoryImageUrl,
+                                      width: 40,
+                                      height: 40,
                                     ),
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          category = "카페/간식";
-                                        });
-                                        Navigator.pop(context);
-                                        _showSubCategory(context);
-                                      },
-                                      child: const Text("카페간식",
-                                          style: TextStyle(fontSize: 10.0)),
-                                    ),
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          category = "술/유흥";
-                                        });
-
-                                        Navigator.pop(context);
-                                        _showSubCategory(context);
-                                      },
-                                      child: const Text("술/유흥",
-                                          style: TextStyle(fontSize: 10.0)),
-                                    ),
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          category = "생활";
-                                        });
-
-                                        Navigator.pop(context);
-                                        _showSubCategory(context);
-                                      },
-                                      child: const Text("생활",
-                                          style: TextStyle(fontSize: 10.0)),
+                                    const SizedBox(height: 8.0),
+                                    Text(
+                                      CategoryName,
+                                      style: const TextStyle(fontSize: 10.0),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 16.0),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          category = "온라인쇼핑";
-                                        });
-
-                                        Navigator.pop(context);
-                                        _showSubCategory(context);
-                                      },
-                                      child: const Text("온라인쇼핑",
-                                          style: TextStyle(fontSize: 10.0)),
-                                    ),
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          category = "패션/쇼핑";
-                                        });
-
-                                        Navigator.pop(context);
-                                        _showSubCategory(context);
-                                      },
-                                      child: const Text("패션/쇼핑",
-                                          style: TextStyle(fontSize: 10.0)),
-                                    ),
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          category = "뷰티/미용";
-                                        });
-
-                                        Navigator.pop(context);
-                                        _showSubCategory(context);
-                                      },
-                                      child: const Text("뷰티/미용",
-                                          style: TextStyle(fontSize: 10.0)),
-                                    ),
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          category = "교통";
-                                        });
-
-                                        Navigator.pop(context);
-                                        _showSubCategory(context);
-                                      },
-                                      child: const Text("교통",
-                                          style: TextStyle(fontSize: 10.0)),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                              );
+                            }).toList(),
                           ),
+                          const SizedBox(height: 16.0),
                         ],
                       ),
                     )),
@@ -249,7 +189,7 @@ class _AddTransState extends State<AddTrans> {
     );
   }
 
-  void _showSubCategory(BuildContext context) {
+  void _showSubCategory(BuildContext context, List<dynamic> subCategories) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) {
@@ -266,57 +206,51 @@ class _AddTransState extends State<AddTrans> {
                   style: TextStyle(fontSize: 10.0, color: Colors.black),
                 ),
               ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.pop(context);
-                  _showCategory(context);
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  child: Text(category, style: const TextStyle(fontSize: 10.0)),
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    subCategory = "커피/음료";
-                  });
-                  Navigator.pop(context);
-                },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16.0),
-                  child: Text("커피/음료", style: TextStyle(fontSize: 10.0)),
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    subCategory = "베이커리";
-                  });
-                  Navigator.pop(context);
-                },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16.0),
-                  child: Text("베이커리", style: TextStyle(fontSize: 10.0)),
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    subCategory = "디저트/떡";
-                  });
-                  Navigator.pop(context);
-                },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16.0),
-                  child: Text("디저트/떡", style: TextStyle(fontSize: 10.0)),
-                ),
+              Column(
+                children: subCategories.map((data) {
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        subCategoryId = data['subCategoryId'];
+                      });
+                      Navigator.pop(context);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      child: Text(
+                        data['subCategoryName'],
+                        style: const TextStyle(
+                            fontSize: 10.0, color: Colors.black),
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
             ],
           ),
         );
       },
     );
+  }
+
+  @override
+  Future<void> didChangeDependencies() async {
+    super.didChangeDependencies();
+    final response = await fetchDataFromAPI();
+
+    if (response.status == CATEGORY_STATUS['CATEGORY_ALL_GET_SUCCESS']) {
+      if (response.allCategories == null) {
+        return;
+      }
+
+      setState(() {
+        allCategory = response.allCategories!;
+      });
+    }
+  }
+
+  Future<CategoryAllResponse> fetchDataFromAPI() async {
+    return await ref.watch(CategoryRepositoryProvider).getAllCategory();
   }
 
   @override
@@ -339,14 +273,22 @@ class _AddTransState extends State<AddTrans> {
                         style: TextStyle(fontSize: 16.0, color: Colors.black),
                       ),
                       const SizedBox(height: 16.0),
-                      CustomTextFormField(
+                      TextFormField(
                         autofocus: true,
-                        // controller: _priceController,
-                        // keyboardType: TextInputType.number,
-                        hintText: "가격을 입력해주세요.",
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        validator: (value) {
+                          return RegExp(r'^[0-9]+$').hasMatch(value!)
+                              ? null
+                              : '숫자만 입력해주세요.';
+                        },
+                        decoration:
+                            const InputDecoration(hintText: "금액을 입력해주세요."),
                         onChanged: (String value) {
                           setState(() {
-                            price = value.replaceAll(",", "");
+                            price = value;
                           });
                         },
                       ),
@@ -368,9 +310,9 @@ class _AddTransState extends State<AddTrans> {
                       ),
                     ),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      SizedBox(
+                      const SizedBox(
                         width: 100.0,
                         child: Text(
                           "분류",
@@ -384,13 +326,34 @@ class _AddTransState extends State<AddTrans> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           CustomButton(
-                            size: ButtonSize.small,
-                            text: '수입',
-                          ),
-                          SizedBox(width: 8.0),
-                          CustomButton(size: ButtonSize.small, text: "지출"),
-                          SizedBox(width: 8.0),
-                          CustomButton(size: ButtonSize.small, text: "이체"),
+                              size: ButtonSize.small,
+                              text: "수입",
+                              isSelected: type == 'INCOME',
+                              onPressed: () {
+                                setState(() {
+                                  type = 'INCOME';
+                                });
+                              }),
+                          const SizedBox(width: 8.0),
+                          CustomButton(
+                              size: ButtonSize.small,
+                              text: "지출",
+                              isSelected: type == 'EXPENDITURE',
+                              onPressed: () {
+                                setState(() {
+                                  type = 'EXPENDITURE';
+                                });
+                              }),
+                          const SizedBox(width: 8.0),
+                          CustomButton(
+                              size: ButtonSize.small,
+                              text: "이체",
+                              isSelected: type == 'TRANSFER',
+                              onPressed: () {
+                                setState(() {
+                                  type = 'TRANSFER';
+                                });
+                              }),
                         ],
                       )
                     ],
@@ -428,13 +391,11 @@ class _AddTransState extends State<AddTrans> {
                           onTap: () {
                             _showCategory(context);
                           },
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             contentPadding: EdgeInsets.zero,
-                            hintText: category == "" && subCategory == ""
-                                ? "미분류"
-                                : "$category > $subCategory",
-                            hintStyle: const TextStyle(
-                                color: BODY_TEXT_COLOR, fontSize: 14),
+                            hintText: "미분류",
+                            hintStyle:
+                                TextStyle(color: BODY_TEXT_COLOR, fontSize: 14),
                             fillColor: INPUT_BG_COLOR,
                             filled: true,
                             border: InputBorder.none,
@@ -474,7 +435,7 @@ class _AddTransState extends State<AddTrans> {
                           cursorColor: PRIMARY_COLOR,
                           onChanged: (String value) {
                             setState(() {
-                              memo = value;
+                              account = value;
                             });
                           },
                           decoration: const InputDecoration(
@@ -525,7 +486,7 @@ class _AddTransState extends State<AddTrans> {
                           onChanged: (value) {},
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.zero,
-                            hintText: paymentMethod.name,
+                            hintText: paymentMethod,
                             hintStyle: const TextStyle(
                                 color: BODY_TEXT_COLOR, fontSize: 14),
                             fillColor: INPUT_BG_COLOR,
@@ -671,17 +632,37 @@ class _AddTransState extends State<AddTrans> {
                 ),
               ],
             ),
-            const SizedBox(height: 20.0),
+            const SizedBox(height: 16.0),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
+                final postProduct = TransActionPost(
+                  price: price,
+                  type: type,
+                  categoryId: categoryId,
+                  subCategoryId: subCategoryId,
+                  account: account,
+                  paymentMethod: paymentMethod,
+                  currentDate: currentDate,
+                  memo: memo,
+                  isBudget: isBudget,
+                );
+
+                await ref.watch(ProductsRepositoryProvider).postProducts(
+                      body: postProduct.toJson(),
+                    );
+
                 Navigator.of(context).pop();
               },
               child: SizedBox(
                 width: MediaQuery.of(context).size.width - 32.0,
-                child: const Text(
-                  "저장",
-                  style: TextStyle(
-                    color: Colors.white,
+                height: 40,
+                child: const Center(
+                  child: Text(
+                    "저장",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16.0,
+                    ),
                   ),
                 ),
               ),
